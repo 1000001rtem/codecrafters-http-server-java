@@ -18,7 +18,7 @@ public class Main {
                 var reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 var writer = clientSocket.getOutputStream();
 
-                var request = buildRequest(reader);
+                var request = receiveRequest(reader);
                 var response = getResponse(request);
 
                 writer.write(response.toByteArray());
@@ -33,12 +33,15 @@ public class Main {
             return HttpResponse.OK_RESPONSE;
         } else if (request.getPath().startsWith("/echo")) {
             return HttpResponse.withTextBody(request.getPath().split("/")[2]);
+        } else if (request.getPath().equals("/user-agent")) {
+            return HttpResponse.withTextBody(request.getHeaders().get("User-Agent"));
+
         } else {
             return HttpResponse.NOT_FOUND_RESPONSE;
         }
     }
 
-    private static HttpRequest buildRequest(BufferedReader reader) {
+    private static HttpRequest receiveRequest(BufferedReader reader) {
         try {
             var request = new HttpRequest();
             var line = reader.readLine();
