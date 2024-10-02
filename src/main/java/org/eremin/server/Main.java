@@ -1,13 +1,12 @@
-import lombok.Data;
-import lombok.experimental.Accessors;
+package org.eremin.server;
+
+import org.eremin.server.model.HttpRequest;
+import org.eremin.server.model.HttpResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.ServerSocket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -22,18 +21,20 @@ public class Main {
                 var request = buildRequest(reader);
                 var response = getResponse(request);
 
-                writer.write(response.getBytes());
+                writer.write(response.toByteArray());
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         }
     }
 
-    private static String getResponse(HttpRequest request) {
-        if(request.getPath().equals("/")) {
-           return "HTTP/1.1 200 OK\r\n\r\n";
+    private static HttpResponse getResponse(HttpRequest request) {
+        if (request.getPath().equals("/")) {
+            return HttpResponse.OK_RESPONSE;
+        } else if (request.getPath().startsWith("/echo")) {
+            return HttpResponse.withTextBody(request.getPath().split("/")[2]);
         } else {
-            return "HTTP/1.1 404 Not Found\r\n\r\n";
+            return HttpResponse.NOT_FOUND_RESPONSE;
         }
     }
 
@@ -60,12 +61,3 @@ public class Main {
     }
 }
 
-@Data
-@Accessors(chain = true)
-class HttpRequest {
-    String method;
-    String path;
-    String version;
-    String host;
-    Map<String, String> headers = new HashMap<>();
-}
