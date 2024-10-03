@@ -11,17 +11,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
+@Setter
 @Accessors(chain = true)
-@Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpResponse {
     private String version = "HTTP/1.1";
     private HttpStatus status;
     private Map<String, String> headers = new HashMap<>();
-    private String body;
+    private Object body;
 
     public static final HttpResponse OK_RESPONSE = new HttpResponse().setStatus(HttpStatus.OK);
-    public static final HttpResponse CREATED_RESONSE = new HttpResponse().setStatus(HttpStatus.CREATED);
+    public static final HttpResponse CREATED_RESPONSE = new HttpResponse().setStatus(HttpStatus.CREATED);
     public static final HttpResponse NOT_FOUND_RESPONSE = new HttpResponse().setStatus(HttpStatus.NOT_FOUND);
     public static final HttpResponse METHOD_NOT_ALLOWED_RESPONSE = new HttpResponse().setStatus(HttpStatus.METHOD_NOT_ALLOWED);
 
@@ -56,7 +56,6 @@ public class HttpResponse {
     public String toString() {
         return version + " " + status + "\r\n" +
                 headers.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue()).collect(Collectors.joining("\r\n")) +
-                "\r\n\r\n" +
-                (body != null ? body : "");
+                "\r\n\r\n";
     }
 }

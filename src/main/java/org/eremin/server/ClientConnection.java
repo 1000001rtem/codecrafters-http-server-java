@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.eremin.server.encoder.CompressionService;
 import org.eremin.server.model.HttpMethod;
 import org.eremin.server.model.HttpRequest;
+import org.eremin.server.model.HttpResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 
 @RequiredArgsConstructor
@@ -32,11 +34,20 @@ public class ClientConnection implements Runnable {
                 response = compressionService.encode(response, request.getHeaders().get("Accept-Encoding").split(", "));
             }
 
-            writer.write(response.toByteArray());
-            System.out.println("sent response: " + response);
+            sendResponse(response, writer);
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         }
+    }
+
+    private void sendResponse(HttpResponse response, OutputStream writer) throws IOException {
+        writer.write(response.toByteArray());
+        switch (response.getBody()) {
+            case String s -> writer.write(s.getBytes());
+            case byte[] b -> writer.write(b);
+            default -> throw new RuntimeException("Unsupported body type");
+        }
+        System.out.println("sent response: " + response);
     }
 
     private HttpRequest receiveRequest(BufferedReader reader) {

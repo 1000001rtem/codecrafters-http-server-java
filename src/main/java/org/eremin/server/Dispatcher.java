@@ -27,7 +27,7 @@ public class Dispatcher {
     }
 
     private String getRoute(String path) {
-        if("/".equals(path)) {
+        if ("/".equals(path)) {
             return path;
         }
         return "/" + path.split("/")[1];

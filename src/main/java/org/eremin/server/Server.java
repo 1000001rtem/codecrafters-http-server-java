@@ -68,7 +68,7 @@ public class Server {
         });
         dispatcher.addEndpoint("/files", HttpMethod.POST, request -> {
             fileHelper.writeToFile(request.getPath().split("/")[2], request.getBody());
-            return HttpResponse.CREATED_RESONSE;
+            return HttpResponse.CREATED_RESPONSE;
         });
     }
 

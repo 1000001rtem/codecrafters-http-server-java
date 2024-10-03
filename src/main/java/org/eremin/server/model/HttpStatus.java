@@ -1,5 +1,8 @@
 package org.eremin.server.model;
 
+import lombok.Getter;
+
+@Getter
 public enum HttpStatus {
     OK(200, "OK"),
     NOT_FOUND(404, "Not Found"),
@@ -13,14 +16,6 @@ public enum HttpStatus {
     HttpStatus(int code, String reason) {
         this.code = code;
         this.reason = reason;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getReason() {
-        return reason;
     }
 
     @Override
