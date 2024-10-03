@@ -1,19 +1,24 @@
 package org.eremin.server.model;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Getter
 @Accessors(chain = true)
 @Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpResponse {
-    String version = "HTTP/1.1";
-    HttpStatus status;
-    ContentType contentType;
-    Integer contentLength;
-    String body;
+    private String version = "HTTP/1.1";
+    private HttpStatus status;
+    private Map<String, String> headers = new HashMap<>();
+    private String body;
 
     public static final HttpResponse OK_RESPONSE = new HttpResponse().setStatus(HttpStatus.OK);
     public static final HttpResponse CREATED_RESONSE = new HttpResponse().setStatus(HttpStatus.CREATED);
@@ -23,17 +28,24 @@ public class HttpResponse {
     public static HttpResponse withTextBody(String body) {
         return new HttpResponse()
                 .setStatus(HttpStatus.OK)
-                .setContentType(ContentType.TEXT_PLAIN)
-                .setContentLength(body.length())
+                .addHeader("Content-Type", ContentType.TEXT_PLAIN.getType())
+                .addHeader("Content-Length", String.valueOf(body.length()))
                 .setBody(body);
     }
 
     public static HttpResponse fileResponse(String body) {
         return new HttpResponse()
                 .setStatus(HttpStatus.OK)
-                .setContentType(ContentType.FILE)
-                .setContentLength(body.length())
+                .addHeader("Content-Type", ContentType.FILE.getType())
+                .addHeader("Content-Length", String.valueOf(body.length()))
                 .setBody(body);
+    }
+
+    public HttpResponse addHeader(String key, String value) {
+        if (key != null && value != null) {
+            this.headers.put(key, value);
+        }
+        return this;
     }
 
     public byte[] toByteArray() {
@@ -43,9 +55,8 @@ public class HttpResponse {
     @Override
     public String toString() {
         return version + " " + status + "\r\n" +
-                (contentType != null ? "Content-Type: " + contentType.getType() + "\r\n" : "") +
-                (contentLength != null ? "Content-Length: " + contentLength + "\r\n" : "") +
-                "\r\n" +
+                headers.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue()).collect(Collectors.joining("\r\n")) +
+                "\r\n\r\n" +
                 (body != null ? body : "");
     }
 }

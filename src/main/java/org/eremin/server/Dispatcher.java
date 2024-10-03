@@ -23,7 +23,6 @@ public class Dispatcher {
     public HttpResponse dispatch(HttpRequest request) {
         var route = endpoints.get(getRoute(request.getPath()));
         if (route == null) return HttpResponse.NOT_FOUND_RESPONSE;
-        System.out.println(route);
         return route.getOrDefault(request.getMethod(), r -> HttpResponse.METHOD_NOT_ALLOWED_RESPONSE).apply(request);
     }
 

@@ -1,9 +1,9 @@
 package org.eremin.server;
 
 import lombok.RequiredArgsConstructor;
+import org.eremin.server.encoder.CompressionService;
 import org.eremin.server.model.HttpMethod;
 import org.eremin.server.model.HttpRequest;
-import org.eremin.server.model.HttpResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +15,7 @@ public class ClientConnection implements Runnable {
 
     private final Socket clientSocket;
     private final Dispatcher dispatcher;
+    private final CompressionService compressionService;
 
     @Override
     public void run() {
@@ -23,15 +24,22 @@ public class ClientConnection implements Runnable {
             var writer = clientSocket.getOutputStream();
 
             var request = receiveRequest(reader);
+            System.out.println("received request: " + request);
             var response = dispatcher.dispatch(request);
 
+
+            if (request.getHeaders().containsKey("Accept-Encoding")) {
+                response = compressionService.encode(response, request.getHeaders().get("Accept-Encoding").split(", "));
+            }
+
             writer.write(response.toByteArray());
+            System.out.println("sent response: " + response);
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         }
     }
 
-    private static HttpRequest receiveRequest(BufferedReader reader) {
+    private HttpRequest receiveRequest(BufferedReader reader) {
         try {
             var request = new HttpRequest();
             var line = reader.readLine();
@@ -51,7 +59,8 @@ public class ClientConnection implements Runnable {
                 char[] body = new char[contentLength];
                 reader.read(body, 0, contentLength);
                 request.setBody(new String(body));
-            }            return request;
+            }
+            return request;
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
             throw new RuntimeException(e);
