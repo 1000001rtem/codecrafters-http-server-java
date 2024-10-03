@@ -26,6 +26,14 @@ public class HttpResponse {
                 .setBody(body);
     }
 
+    public static HttpResponse fileResponse(String body) {
+        return new HttpResponse()
+                .setStatus(HttpStatus.OK)
+                .setContentType(ContentType.FILE)
+                .setContentLength(body.length())
+                .setBody(body);
+    }
+
     public byte[] toByteArray() {
         return toString().getBytes();
     }

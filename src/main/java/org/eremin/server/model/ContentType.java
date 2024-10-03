@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum ContentType {
 
-    TEXT_PLAIN("text/plain");
+    TEXT_PLAIN("text/plain"),
+    FILE("application/octet-stream");
 
     private final String type;
 
