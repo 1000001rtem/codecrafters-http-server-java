@@ -1,6 +1,7 @@
 package org.eremin.server;
 
 import org.eremin.server.exception.FileNotFoundException;
+import org.eremin.server.model.HttpMethod;
 import org.eremin.server.model.HttpResponse;
 
 import java.net.ServerSocket;
@@ -17,7 +18,7 @@ public class Main {
 
             Dispatcher dispatcher = new Dispatcher();
             var arguments = parseArgs(args);
-            FileReader fileReader = new FileReader(arguments.get("directory"));
+            FileHelper fileReader = new FileHelper(arguments.get("directory"));
             initDispatcher(dispatcher, fileReader);
 
             try (ExecutorService connectionPoll = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
@@ -31,16 +32,20 @@ public class Main {
         }
     }
 
-    private static void initDispatcher(Dispatcher dispatcher, FileReader fileReader) {
-        dispatcher.addEndpoint("/", request -> HttpResponse.OK_RESPONSE);
-        dispatcher.addEndpoint("/echo", request -> HttpResponse.withTextBody(request.getPath().split("/")[2]));
-        dispatcher.addEndpoint("/user-agent", request -> HttpResponse.withTextBody(request.getHeaders().get("User-Agent")));
-        dispatcher.addEndpoint("/files", request -> {
+    private static void initDispatcher(Dispatcher dispatcher, FileHelper fileHelper) {
+        dispatcher.addEndpoint("/", HttpMethod.GET, request -> HttpResponse.OK_RESPONSE);
+        dispatcher.addEndpoint("/echo", HttpMethod.GET, request -> HttpResponse.withTextBody(request.getPath().split("/")[2]));
+        dispatcher.addEndpoint("/user-agent", HttpMethod.GET, request -> HttpResponse.withTextBody(request.getHeaders().get("User-Agent")));
+        dispatcher.addEndpoint("/files", HttpMethod.GET, request -> {
             try {
-                return HttpResponse.fileResponse(fileReader.read(request.getPath().split("/")[2]));
+                return HttpResponse.fileResponse(fileHelper.readFile(request.getPath().split("/")[2]));
             } catch (FileNotFoundException e) {
                 return HttpResponse.NOT_FOUND_RESPONSE;
             }
+        });
+        dispatcher.addEndpoint("/files", HttpMethod.POST, request -> {
+            fileHelper.writeToFile(request.getPath().split("/")[2], request.getBody());
+            return HttpResponse.CREATED_RESONSE;
         });
     }
 

@@ -9,9 +9,10 @@ import java.util.Map;
 @Data
 @Accessors(chain = true)
 public class HttpRequest {
-    String method;
+    HttpMethod method;
     String path;
     String version;
     String host;
+    String body;
     Map<String, String> headers = new HashMap<>();
 }

@@ -1,6 +1,7 @@
 package org.eremin.server;
 
 import lombok.RequiredArgsConstructor;
+import org.eremin.server.model.HttpMethod;
 import org.eremin.server.model.HttpRequest;
 import org.eremin.server.model.HttpResponse;
 
@@ -35,7 +36,7 @@ public class ClientConnection implements Runnable {
             var request = new HttpRequest();
             var line = reader.readLine();
             var requestLine = line.split(" ");
-            request.setMethod(requestLine[0])
+            request.setMethod(HttpMethod.valueOf(requestLine[0]))
                     .setPath(requestLine[1])
                     .setVersion(requestLine[2]);
             line = reader.readLine();
@@ -45,7 +46,12 @@ public class ClientConnection implements Runnable {
                 request.getHeaders().put(header[0], header[1]);
                 line = reader.readLine();
             }
-            return request;
+            if (request.getHeaders().containsKey("Content-Length")) {
+                int contentLength = Integer.parseInt(request.getHeaders().get("Content-Length"));
+                char[] body = new char[contentLength];
+                reader.read(body, 0, contentLength);
+                request.setBody(new String(body));
+            }            return request;
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
             throw new RuntimeException(e);

@@ -15,8 +15,10 @@ public class HttpResponse {
     Integer contentLength;
     String body;
 
-    public static final HttpResponse NOT_FOUND_RESPONSE = new HttpResponse().setStatus(HttpStatus.NOT_FOUND);
     public static final HttpResponse OK_RESPONSE = new HttpResponse().setStatus(HttpStatus.OK);
+    public static final HttpResponse CREATED_RESONSE = new HttpResponse().setStatus(HttpStatus.CREATED);
+    public static final HttpResponse NOT_FOUND_RESPONSE = new HttpResponse().setStatus(HttpStatus.NOT_FOUND);
+    public static final HttpResponse METHOD_NOT_ALLOWED_RESPONSE = new HttpResponse().setStatus(HttpStatus.METHOD_NOT_ALLOWED);
 
     public static HttpResponse withTextBody(String body) {
         return new HttpResponse()
